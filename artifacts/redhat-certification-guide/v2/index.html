@@ -1,0 +1,872 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: var(--font-sans); color: var(--color-text-primary); }
+
+.deck { width: 100%; }
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 12px 12px 0;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-bottom: none;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+.nav-btn {
+  padding: 6px 14px;
+  border-radius: 6px 6px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-btn:hover { color: var(--color-text-primary); background: var(--color-background-primary); }
+.nav-btn.active {
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-bottom: none;
+}
+
+.slide {
+  display: none;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  overflow: hidden;
+}
+.slide.active { display: block; }
+
+.slide-header {
+  padding: 28px 32px 20px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.slide-num-badge {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #A32D2D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #FCEBEB;
+  margin-top: 2px;
+}
+.slide-title-block {}
+.slide-tag {
+  font-size: 11px;
+  color: #A32D2D;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.slide-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.slide-body {
+  padding: 24px 32px 28px;
+}
+
+.lead-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+  max-width: 640px;
+}
+.lead-text strong {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.info-card {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+}
+.info-card-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.info-card-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+.info-card-sub {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.red-accent { color: #A32D2D; }
+.badge-red {
+  display: inline-block;
+  background: #FCEBEB;
+  color: #791F1F;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 0.5px solid #F09595;
+}
+
+.divider {
+  border: none;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  margin: 20px 0;
+}
+
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.highlight-box {
+  background: #FCEBEB;
+  border: 0.5px solid #F09595;
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.highlight-box p {
+  font-size: 14px;
+  color: #501313;
+  line-height: 1.7;
+}
+.highlight-box strong { color: #791F1F; }
+
+.tip-box {
+  background: var(--color-background-info);
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.tip-box p { font-size: 14px; color: var(--color-text-info); line-height: 1.7; }
+
+.check-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.check-list li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  align-items: flex-start;
+}
+.check-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  margin-top: 2px;
+}
+.check-ok { background: var(--color-background-success); color: var(--color-text-success); }
+.check-no { background: var(--color-background-danger); color: var(--color-text-danger); }
+
+.tier-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 20px;
+}
+.tier-box {
+  flex: 1;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 0;
+  padding: 16px 14px;
+  background: var(--color-background-secondary);
+  text-align: center;
+}
+.tier-box:first-child { border-radius: var(--border-radius-md) 0 0 var(--border-radius-md); }
+.tier-box:last-child  { border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; }
+.tier-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  color: var(--color-text-tertiary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.tier-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.tier-exam { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 6px; }
+.tier-cond { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
+
+.prefix-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.prefix-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.prefix-table td {
+  font-size: 13px;
+  padding: 10px 10px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  vertical-align: top;
+  color: var(--color-text-primary);
+}
+.prefix-table tr:last-child td { border-bottom: none; }
+.prefix-table td:first-child { font-weight: 500; }
+.pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 99px;
+  margin-right: 4px;
+}
+.pill-rh  { background: #FCEBEB; color: #791F1F; border: 0.5px solid #F09595; }
+.pill-do  { background: #E6F1FB; color: #0C447C; border: 0.5px solid #85B7EB; }
+.pill-au  { background: #FAEEDA; color: #633806; border: 0.5px solid #EF9F27; }
+.pill-ex  { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); }
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.plan-card {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  background: var(--color-background-primary);
+}
+.plan-card.featured {
+  border: 2px solid var(--color-border-info);
+}
+.plan-badge {
+  font-size: 10px;
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+.plan-name { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+.plan-feat { font-size: 12px; color: var(--color-text-secondary); line-height: 1.9; }
+.plan-feat .on { color: var(--color-text-success); }
+.plan-feat .off { color: var(--color-text-tertiary); }
+
+.speaker-notes {
+  background: var(--color-background-secondary);
+  border-top: 0.5px solid var(--color-border-tertiary);
+  padding: 0;
+}
+.notes-toggle {
+  width: 100%;
+  padding: 10px 32px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+}
+.notes-toggle:hover { color: var(--color-text-secondary); }
+.notes-caret { transition: transform 0.2s; font-size: 10px; }
+.notes-caret.open { transform: rotate(180deg); }
+.notes-content {
+  display: none;
+  padding: 0 32px 20px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--color-text-secondary);
+}
+.notes-content.open { display: block; }
+.notes-content p { margin-bottom: 10px; }
+.notes-content p:last-child { margin-bottom: 0; }
+.notes-content strong { color: var(--color-text-primary); font-weight: 500; }
+</style>
+
+<div class="deck">
+
+  <div class="nav" id="nav-bar">
+    <button class="nav-btn active" onclick="show(0)">0. 表紙</button>
+    <button class="nav-btn" onclick="show(1)">1. 概要</button>
+    <button class="nav-btn" onclick="show(2)">2. コード体系</button>
+    <button class="nav-btn" onclick="show(3)">3. 称号ロードマップ</button>
+    <button class="nav-btn" onclick="show(4)">4. RHEL / Ansible</button>
+    <button class="nav-btn" onclick="show(5)">5. OpenShift</button>
+    <button class="nav-btn" onclick="show(6)">6. 実機試験の特徴</button>
+    <button class="nav-btn" onclick="show(7)">7. 自宅受験環境</button>
+    <button class="nav-btn" onclick="show(8)">8. Exam Experience</button>
+    <button class="nav-btn" onclick="show(9)">9. RHLS プラン</button>
+  </div>
+
+  <!-- ===== SLIDE 0: COVER ===== -->
+  <div class="slide active" id="s0">
+    <div style="padding: 48px 40px 40px; border-bottom: 0.5px solid var(--color-border-tertiary);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+        <div style="width: 36px; height: 36px; background: #A32D2D; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 7V13L10 18L2 13V7L10 2Z" fill="#FCEBEB" opacity="0.9"/></svg>
+        </div>
+        <span style="font-size: 13px; font-weight: 500; color: #A32D2D; letter-spacing: 0.05em;">Red Hat 認定資格 ご紹介</span>
+      </div>
+      <h1 style="font-size: 28px; font-weight: 500; line-height: 1.35; color: var(--color-text-primary); margin-bottom: 16px; max-width: 520px;">
+        Red Hat 認定資格<br>完全ガイド 2026
+      </h1>
+      <p style="font-size: 15px; color: var(--color-text-secondary); line-height: 1.7; max-width: 520px;">
+        ウェビナー・研修導入向け資料 — RHCSA から RHCA まで、体系・試験形式・学習プランをわかりやすく解説します。
+      </p>
+    </div>
+    <div style="padding: 24px 40px; display: flex; gap: 24px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 180px;">
+        <div class="info-card-label">対象者</div>
+        <div style="font-size: 14px; color: var(--color-text-primary); line-height: 1.7;">Red Hat 認定資格を初めて知る<br>IT エンジニア・学習者</div>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <div class="info-card-label">所要時間</div>
+        <div style="font-size: 14px; color: var(--color-text-primary);">約 30 分</div>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <div class="info-card-label">スライド数</div>
+        <div style="font-size: 14px; color: var(--color-text-primary);">表紙含む 10 枚</div>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <div class="info-card-label">更新日</div>
+        <div style="font-size: 14px; color: var(--color-text-primary);">2026 年 3 月</div>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n0')">Speaker notes <span class="notes-caret" id="c0">▼</span></button>
+      <div class="notes-content" id="n0">
+        <p>本スライドは、Red Hat 認定資格を初めて耳にする学習者・エンジニアに向けたウェビナー・社内研修用の導入資料です。</p>
+        <p>「資格を取るべきか迷っている」「何から始めればわからない」という方が、このセッション終了後に<strong>「次の一手」が明確になる</strong>ことを目標にしています。</p>
+        <p>進行の目安：各スライド 2〜3 分、質疑応答 5〜10 分で合計 30〜40 分を想定しています。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 1: OVERVIEW ===== -->
+  <div class="slide" id="s1">
+    <div class="slide-header">
+      <div class="slide-num-badge">1</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">概要</div>
+        <div class="slide-title">Red Hat 認定資格とは？</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Red Hat 認定は、<strong>エンタープライズ Linux・クラウド・自動化</strong>の領域で世界的に認められた IT 資格体系です。選択式問題ではなく、<strong>実機操作による実技試験</strong>のみで合否が判定される点が最大の特徴です。
+      </p>
+      <div class="info-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="info-card">
+          <div class="info-card-label">試験形式</div>
+          <div class="info-card-value">実機操作のみ</div>
+          <div class="info-card-sub">選択式・穴埋めなし。実際のシステムを動かして採点</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">対象技術</div>
+          <div class="info-card-value">RHEL / OpenShift / Ansible</div>
+          <div class="info-card-sub">Linux 基盤からコンテナ・自動化まで幅広くカバー</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">受験方法</div>
+          <div class="info-card-value">会場受験 / 自宅受験</div>
+          <div class="info-card-sub">Remote Exam により自宅の PC から受験可能</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>なぜ価値があるのか：</strong>実機で動かして初めて合格できる形式のため、「知識だけ」の暗記では通用しません。取得者はその技術を実際に使いこなせる証明として、採用・昇進・案件獲得の場面で評価されます。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n1')">Speaker notes <span class="notes-caret" id="c1">▼</span></button>
+      <div class="notes-content" id="n1">
+        <p>「Red Hat の資格は聞いたことがあるけれど、どんな試験なの？」という疑問からスタートしましょう。</p>
+        <p>最も伝えるべき点は<strong>「実技試験のみ」</strong>という事実です。TOEIC や情報処理試験のような選択式・記述式は一切なく、制限時間内に実際の Linux 環境上でコマンドを打ち、設定を完成させ、サービスを起動する——その結果だけで合否が決まります。</p>
+        <p>だからこそ、「試験に合格している = 実際にできる人」という市場の信頼が生まれています。採用担当者・プロジェクトマネージャーが RHCSA・RHCE という文字を履歴書で見たとき、即戦力として評価するのはそのためです。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 2: CODE SYSTEM ===== -->
+  <div class="slide" id="s2">
+    <div class="slide-header">
+      <div class="slide-num-badge">2</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">体系理解</div>
+        <div class="slide-title">コース・試験コードの読み方</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        コードには<strong>意味があります</strong>。接頭辞でドメインが、百の位の数字で難易度がわかります。トレーニングと試験は同じ番号で対応しているため、学習パスが直感的に設計できます。
+      </p>
+      <table class="prefix-table">
+        <thead>
+          <tr>
+            <th>接頭辞</th>
+            <th>ドメイン</th>
+            <th>代表的なコード</th>
+            <th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-rh">RH</span></td>
+            <td>RHEL 系</td>
+            <td>RH124, RH134, RH199</td>
+            <td style="color: var(--color-text-secondary); font-size: 12px;">Red Hat Enterprise Linux の管理・運用</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-do">DO</span></td>
+            <td>OpenShift / コンテナ系</td>
+            <td>DO180, DO280, DO156</td>
+            <td style="color: var(--color-text-secondary); font-size: 12px;">Kubernetes ベースのコンテナプラットフォーム</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-au">AU</span></td>
+            <td>Ansible 系</td>
+            <td>AU294</td>
+            <td style="color: var(--color-text-secondary); font-size: 12px;">Ansible による IT 自動化・構成管理</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-ex">EX</span></td>
+            <td>試験 (Exam)</td>
+            <td>EX200, EX294, EX188</td>
+            <td style="color: var(--color-text-secondary); font-size: 12px;">実技試験。対応トレーニングと番号が一致</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tip-box">
+        <p><strong>百の位 = 難易度レベル：</strong> 1xx は入門・基礎、2xx は中級、4xx 以上は上級・専門領域。例）DO180（入門）→ DO280（中級）と段階的に学べます。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n2')">Speaker notes <span class="notes-caret" id="c2">▼</span></button>
+      <div class="notes-content" id="n2">
+        <p>コードの規則性を理解すると、カタログが一気に読めるようになります。「DO280 を受けたい」と思ったら、対応する試験は「EX280」です。番号が同じなのでシンプルです。</p>
+        <p>よく混乱するポイントは <strong>「RH と AU の違い」</strong>。RH は RHEL（Linux そのもの）のトレーニング、AU は Ansible（自動化ツール）のトレーニングです。最終的には両方学ぶことになる場合が多いですが、最初は別ドメインとして区別して覚えましょう。</p>
+        <p>「EX は全部試験コード」と覚えておくと、カタログを眺めたときに「これは学ぶコース」「これは受験するもの」と即座に判別できます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 3: ROADMAP ===== -->
+  <div class="slide" id="s3">
+    <div class="slide-header">
+      <div class="slide-num-badge">3</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">称号・キャリアパス</div>
+        <div class="slide-title">RHCSA → RHCE → RHCA への道</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Red Hat 認定には<strong>3 つの主要称号</strong>があります。それぞれに明確な取得条件があり、積み上げ式で上位称号を目指す構造です。
+      </p>
+      <div class="tier-flow">
+        <div class="tier-box" style="border-left: 3px solid #A32D2D;">
+          <div style="margin-bottom: 8px;"><span class="badge-red">入門〜中級</span></div>
+          <div class="tier-name">RHCSA</div>
+          <div class="tier-exam">Red Hat Certified<br>System Administrator</div>
+          <hr class="divider" style="margin: 10px 0;">
+          <div class="tier-cond"><strong style="font-size: 12px; color: var(--color-text-primary);">取得条件</strong><br>EX200 合格のみ</div>
+        </div>
+        <div class="tier-arrow">→</div>
+        <div class="tier-box" style="border-left: 3px solid #185FA5;">
+          <div style="margin-bottom: 8px;"><span style="display: inline-block; background: #E6F1FB; color: #0C447C; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; border: 0.5px solid #85B7EB;">中級</span></div>
+          <div class="tier-name">RHCE</div>
+          <div class="tier-exam">Red Hat Certified<br>Engineer</div>
+          <hr class="divider" style="margin: 10px 0;">
+          <div class="tier-cond"><strong style="font-size: 12px; color: var(--color-text-primary);">取得条件</strong><br>有効な RHCSA 保有<br>+ EX294 合格</div>
+        </div>
+        <div class="tier-arrow">→</div>
+        <div class="tier-box" style="border-left: 3px solid #854F0B;">
+          <div style="margin-bottom: 8px;"><span style="display: inline-block; background: #FAEEDA; color: #633806; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; border: 0.5px solid #EF9F27;">上級</span></div>
+          <div class="tier-name">RHCA</div>
+          <div class="tier-exam">Red Hat Certified<br>Architect</div>
+          <hr class="divider" style="margin: 10px 0;">
+          <div class="tier-cond"><strong style="font-size: 12px; color: var(--color-text-primary);">取得条件</strong><br>有効な RHCE 保有<br>+ 任意の EX を<br>5 つ取得</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>「有効な」認定について：</strong> 各認定には有効期限があります。RHCSA が失効すると RHCE の要件を満たせなくなるため、定期的な更新（再受験）が必要です。学習を継続するインセンティブにもなっています。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n3')">Speaker notes <span class="notes-caret" id="c3">▼</span></button>
+      <div class="notes-content" id="n3">
+        <p>「どこから始めればいいですか？」という質問への答えは常に <strong>RHCSA（EX200）から</strong> です。これは前提資格ではなく、ここが全ての出発点です。</p>
+        <p>RHCE は EX294（Ansible）の試験ですが、受験時点で有効な RHCSA が必要です。つまり RHCSA が「門番」の役割を果たしています。順番を飛ばすことはできません。</p>
+        <p>RHCA は最上位称号ですが、「任意の 5 認定」という自由度があります。OpenShift を専門にするもよし、セキュリティ系を選ぶもよし。自分のキャリア方向に合わせて設計できる点が魅力です。</p>
+        <p>受講者にはこう伝えるといいでしょう：<strong>「まず EX200 を取ることだけを考えてください。その先は自然に見えてきます。」</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 4: RHEL/ANSIBLE ===== -->
+  <div class="slide" id="s4">
+    <div class="slide-header">
+      <div class="slide-num-badge">4</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">学習パス — 基礎〜中級</div>
+        <div class="slide-title">RHEL と Ansible で土台を作る</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Linux とその自動化は、すべての上位認定の土台です。RH 系コースで Linux の実務運用を身につけ、AU 系コースで Ansible による自動化を習得することで <strong>RHCSA → RHCE</strong> を目指せます。
+      </p>
+      <div class="info-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="info-card">
+          <div class="info-card-label" style="margin-bottom: 10px;"><span class="pill pill-rh">RH</span> RHEL 系</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">RH124 — RHEL 基礎 I</div>
+              <div style="font-size: 12px; color: var(--color-text-secondary);">CLI 操作、ファイル管理、ユーザー管理の基本</div>
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">RH134 — RHEL 基礎 II</div>
+              <div style="font-size: 12px; color: var(--color-text-secondary);">ネットワーク、ストレージ、SELinux、サービス管理</div>
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">RH199 — RHCSA 速習</div>
+              <div style="font-size: 12px; color: var(--color-text-secondary);">RH124+RH134 の内容を短期集中で習得</div>
+            </div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label" style="margin-bottom: 10px;"><span class="pill pill-au">AU</span> Ansible 系</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">AU294 — Ansible 自動化</div>
+              <div style="font-size: 12px; color: var(--color-text-secondary);">Playbook 作成、ロール管理、Linux 自動化の実践</div>
+            </div>
+            <div style="margin-top: 8px; padding: 10px; background: var(--color-background-secondary); border-radius: var(--border-radius-md);">
+              <div style="font-size: 12px; color: var(--color-text-secondary);">対応試験：<strong style="color: var(--color-text-primary);">EX294</strong> に合格すると RHCE 取得</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tip-box">
+        <p><strong>時間が取れない場合の選択肢：</strong> RH199（RHCSA Rapid Track）は RH124 と RH134 を圧縮した短期集中コースです。ある程度 Linux 経験がある方に特に有効です。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n4')">Speaker notes <span class="notes-caret" id="c4">▼</span></button>
+      <div class="notes-content" id="n4">
+        <p>RHCSA を目指す方には、Linux 経験がほぼない場合は <strong>RH124 → RH134</strong> の順で受講することを推奨してください。ある程度経験がある場合は RH199 で時間を圧縮できます。</p>
+        <p>Ansible（AU294）は「Linux を自動化する」というコンセプトなので、まず Linux そのものをしっかり理解してからが効果的です。RHCSA 取得後に AU294 に進む流れが最も学習効率が高いです。</p>
+        <p>「Ansible って何ですか？」と聞かれたら：「多数のサーバーに同じ設定を一括で自動適用するための言語・ツールです。100 台のサーバーに設定を手動で入れる代わりに、1 つの設定ファイルを実行するだけで完了します」と説明するとイメージしやすいです。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 5: OPENSHIFT ===== -->
+  <div class="slide" id="s5">
+    <div class="slide-header">
+      <div class="slide-num-badge">5</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">学習パス — 最先端技術</div>
+        <div class="slide-title">OpenShift とコンテナで最前線へ</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        クラウドネイティブ時代のインフラエンジニアに求められる技術が DO 系コースに集まっています。Kubernetes ベースの OpenShift を扱う能力は、<strong>現在の市場でもっとも需要が高いスキルセットの一つ</strong>です。
+      </p>
+      <div class="info-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="info-card">
+          <div class="info-card-label">DO180</div>
+          <div class="info-card-value">OpenShift 入門</div>
+          <div class="info-card-sub">コンテナとは何か。OpenShift 上での基本的なアプリケーションデプロイを習得</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">DO280</div>
+          <div class="info-card-value">OCP 管理</div>
+          <div class="info-card-sub">OpenShift クラスター自体の設定・管理・セキュリティを担当するエンジニア向け</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">DO156</div>
+          <div class="info-card-value">Virtualization</div>
+          <div class="info-card-sub">VM とコンテナを同一プラットフォームで管理するハイブリッドインフラを学ぶ</div>
+        </div>
+      </div>
+      <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 16px; margin-bottom: 16px; border: 0.5px solid var(--color-border-tertiary);">
+        <div style="font-size: 12px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">RHCA への貢献</div>
+        <div style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.7;">DO 系の各試験（EX180、EX280、EX156 等）に合格することで RHCA に必要な「5 認定」のカウントに含まれます。OpenShift を専門とするアーキテクトを目指す場合、DO 系を中心に組み立てることが可能です。</div>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n5')">Speaker notes <span class="notes-caret" id="c5">▼</span></button>
+      <div class="notes-content" id="n5">
+        <p>「コンテナ」「Kubernetes」「OpenShift」という言葉に馴染みがない受講者がいる場合、次のように説明できます：「従来はアプリを動かすために専用のサーバーを用意していましたが、コンテナ技術を使えば一台のサーバー上で多数のアプリを安全に分離して動かせます。OpenShift はそれを大規模に管理するための基盤です」</p>
+        <p>DO180 は RHCSA 取得後に並行して進めることもできますが、Linux の基礎知識が前提になります。完全な初心者には RHEL 系から始めることを推奨します。</p>
+        <p><strong>「現場で使われているか？」という問いに対しては：</strong> 現在、金融・製造・通信・官公庁を含む多くの大企業が OpenShift 上でシステムを稼働させており、OpenShift を扱えるエンジニアへの需要は継続して高い水準にあります。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 6: EXAM FORMAT ===== -->
+  <div class="slide" id="s6">
+    <div class="slide-header">
+      <div class="slide-num-badge">6</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">試験の特徴</div>
+        <div class="slide-title">実機試験だからこそ、本物の実力が証明できる</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Red Hat 試験は<strong>「実機操作のみ」</strong>で合否が決まる実技試験です。他の IT 資格と何が違うのか、具体的な形式と合格のためのポイントを整理します。
+      </p>
+      <div class="row-2col">
+        <div>
+          <div style="font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--color-text-primary);">一般的な IT 試験との違い</div>
+          <ul class="check-list">
+            <li><span class="check-icon check-no">✗</span><span>選択式問題は<strong>一切なし</strong></span></li>
+            <li><span class="check-icon check-no">✗</span><span>穴埋め・記述問題もなし</span></li>
+            <li><span class="check-icon check-ok">✓</span><span>実際の RHEL 環境でコマンドを打ち、設定を完成させる</span></li>
+            <li><span class="check-icon check-ok">✓</span><span>採点は自動スクリプト。「動いているか」だけが評価基準</span></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--color-text-primary);">合格への 3 つの実践的ポイント</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border-left: 3px solid #A32D2D;">
+              <span style="font-size: 11px; font-weight: 500; color: #A32D2D; min-width: 20px;">01</span>
+              <span style="font-size: 13px; color: var(--color-text-primary); line-height: 1.5;"><strong>Copy & Paste を徹底</strong>：問題文からコマンドをコピーしてスペルミスを防ぐ</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border-left: 3px solid #A32D2D;">
+              <span style="font-size: 11px; font-weight: 500; color: #A32D2D; min-width: 20px;">02</span>
+              <span style="font-size: 13px; color: var(--color-text-primary); line-height: 1.5;"><strong>man / --help を活用</strong>：試験環境内のドキュメントは使用可</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border-left: 3px solid #A32D2D;">
+              <span style="font-size: 11px; font-weight: 500; color: #A32D2D; min-width: 20px;">03</span>
+              <span style="font-size: 13px; color: var(--color-text-primary); line-height: 1.5;"><strong>確実に解ける問題から着手</strong>：スコアを積み上げて心理的余裕を確保</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>実技試験の価値：</strong> 「知っている」と「できる」は違います。実機で合格した認定者は、現場で即戦力として機能します。採用・昇進の場面でこの違いが評価されます。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n6')">Speaker notes <span class="notes-caret" id="c6">▼</span></button>
+      <div class="notes-content" id="n6">
+        <p>「実技試験って難しくないですか？」という不安に対しては：「難しいのは事実ですが、裏を返せばしっかり練習した人が必ず合格できる試験です。暗記だけでは突破できない分、練習した分だけ結果に直結します」</p>
+        <p><strong>man コマンドの使用について：</strong> 試験中に Linux のマニュアルを参照することは、カンニングではなく「許可されているリソースの活用」です。実務でも同様に使うスキルなので、試験でも積極的に使うよう伝えましょう。</p>
+        <p>Copy & Paste については「なぜ重要か」を強調すると納得度が上がります：試験中に `configure` を `confgure` とミスタイプするだけでコマンドが失敗し、貴重な時間を失います。実務でも正確にコマンドを入力することは基本の基本です。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 7: REMOTE EXAM ===== -->
+  <div class="slide" id="s7">
+    <div class="slide-header">
+      <div class="slide-num-badge">7</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">自宅受験</div>
+        <div class="slide-title">Remote Exam — 自宅受験の環境要件</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Red Hat は会場受験に加え、自宅の PC から受験できる <strong>Remote Exam</strong> を提供しています。試験官がカメラ越しに環境を確認するため、事前の準備が重要です。
+      </p>
+      <div class="row-2col">
+        <div>
+          <div style="font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--color-text-primary);">デスク・機材のルール</div>
+          <ul class="check-list">
+            <li><span class="check-icon check-no">✗</span><span><strong>外部モニター禁止</strong>：ラップトップの内蔵画面のみ。取り外しかカバーが必要</span></li>
+            <li><span class="check-icon check-no">✗</span><span>スマートフォン・腕時計・メモ帳・ペン：すべてデスク上に置けない</span></li>
+            <li><span class="check-icon check-ok">✓</span><span><strong>飲み物は置いてもOK</strong>。長丁場の試験、水分補給は許可</span></li>
+            <li><span class="check-icon check-ok">✓</span><span>部屋全体とデスク上が確認できるカメラ配置が必要</span></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--color-text-primary);">技術的な事前準備</div>
+          <ul class="check-list">
+            <li><span class="check-icon check-ok">✓</span><span>Red Hat 提供の <strong>専用 USB 起動メモリ</strong> を事前に作成</span></li>
+            <li><span class="check-icon check-ok">✓</span><span>OS 起動失敗時に備え、公式 FAQ を事前確認</span></li>
+            <li><span class="check-icon check-ok">✓</span><span>ネットワーク接続の安定性を事前に確認・テスト</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>当日に慌てないために：</strong> 技術的なトラブル（USB 起動失敗、カメラ認識不具合など）は事前準備で防げるものがほとんどです。受験申し込み後、早めに環境構築を済ませておくことを強くお勧めします。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n7')">Speaker notes <span class="notes-caret" id="c7">▼</span></button>
+      <div class="notes-content" id="n7">
+        <p>「飲み物 OK」は意外と喜ばれるポイントです。試験時間は 2〜3 時間あるため、水分補給の可否は集中力に直結します。緊張している受験者に対して「飲み物だけは持ち込めます」と伝えると、少し安心感が生まれます。</p>
+        <p>外部モニター禁止については「なぜ？」と聞かれることがあります。試験の公平性と不正防止のため、画面が複数あると試験以外の情報を参照している可能性を排除できないためです。</p>
+        <p><strong>USB 起動メモリの重要性：</strong> Remote Exam では PC を通常の OS ではなく、Red Hat が提供する専用の環境から起動して試験を受けます。このメモリが作成できていないと、試験当日に起動すらできない事態になります。必ず早めに準備するよう伝えましょう。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 8: EXAM EXPERIENCE ===== -->
+  <div class="slide" id="s8">
+    <div class="slide-header">
+      <div class="slide-num-badge">8</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">RHLS 特典</div>
+        <div class="slide-title">Exam Experience — 本番と同じ環境で練習できる</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        <strong>Exam Experience</strong> は、RHLS（Red Hat Learning Subscription）のサブスクリプション利用者が使える模擬試験サービスです。本番試験と全く同じプロセス・環境で受験できるため、当日の不安を大幅に軽減できます。
+      </p>
+      <div class="info-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="info-card">
+          <div class="info-card-label">本番再現度</div>
+          <div class="info-card-value">高い</div>
+          <div class="info-card-sub">試験監督チェック、インターフェース、制限時間まで本番と同一のプロセス</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">難易度</div>
+          <div class="info-card-value">本番同等</div>
+          <div class="info-card-sub">実際の試験難易度と雰囲気を事前体験できる唯一の手段</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">利用条件</div>
+          <div class="info-card-value">RHLS Standard /<br>Premium のみ</div>
+          <div class="info-card-sub">Course プランには含まれないため、プラン選択時に確認を</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>「初めて」の不安を事前に解消：</strong> 試験に臨む前に「本番と同じ感覚」を一度経験しておくことで、当日の焦り・操作の迷いを大幅に減らせます。特に Remote Exam が初めての方にとっては非常に有効な準備手段です。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n8')">Speaker notes <span class="notes-caret" id="c8">▼</span></button>
+      <div class="notes-content" id="n8">
+        <p>「本番に近い環境で練習できる」というのは、スポーツでいえば「同じスタジアムで練習試合ができる」ようなものです。技術的な準備が十分でも、試験の独特な緊張感・インターフェース・時間配分に慣れていないと本番で実力を発揮できないことがあります。</p>
+        <p>Exam Experience を使った受験者の多くが「当日は 2 回目だという感覚だった」と報告しています。<strong>「初めての感覚」を模擬試験で消化してから本番に臨むことができる</strong>のは、RHLS Standard/Premium の最大のメリットの一つです。</p>
+        <p>RHLS Course プランとの違いとして、この点を強調することで Standard/Premium の投資対効果をより具体的に説明できます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 9: RHLS PLANS ===== -->
+  <div class="slide" id="s9">
+    <div class="slide-header">
+      <div class="slide-num-badge">9</div>
+      <div class="slide-title-block">
+        <div class="slide-tag">学習サブスクリプション</div>
+        <div class="slide-title">RHLS プラン比較 — あなたに合った学習投資を</div>
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="lead-text">
+        Red Hat Learning Subscription（RHLS）は、Red Hat 認定資格の学習を体系的にサポートするサブスクリプションです。目的と予算に応じて 3 つのプランから選べます。
+      </p>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div class="plan-name">Course</div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.5;">1 つの資格に集中したい方向け</div>
+          <div class="plan-feat">
+            <div><span class="on">✓</span> 特定コース 1 つのアクセス</div>
+            <div><span class="off">—</span> 全カタログ: 対象外</div>
+            <div><span class="off">—</span> 試験チケット: 別途購入</div>
+            <div><span class="off">—</span> Exam Experience: 対象外</div>
+          </div>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-badge">おすすめ</div>
+          <div class="plan-name">Standard</div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.5;">複数認定を目指す方・本番対策も行いたい方</div>
+          <div class="plan-feat">
+            <div><span class="on">✓</span> 全カタログへのアクセス</div>
+            <div><span class="on">✓</span> 試験チケット 5 回分</div>
+            <div><span class="on">✓</span> Exam Experience 利用可</div>
+          </div>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-badge">おすすめ</div>
+          <div class="plan-name">Premium</div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.5;">より手厚いサポートが必要な方</div>
+          <div class="plan-feat">
+            <div><span class="on">✓</span> 全カタログへのアクセス</div>
+            <div><span class="on">✓</span> 試験チケット 5 回分</div>
+            <div><span class="on">✓</span> Exam Experience 利用可</div>
+            <div><span class="on">✓</span> 追加サポート機能</div>
+          </div>
+        </div>
+      </div>
+      <div class="tip-box">
+        <p><strong>判断の目安：</strong> RHCSA だけを短期で取りたい場合は Course。RHCE・RHCA まで見据えたキャリア設計をしたい場合は Standard / Premium が費用対効果の高い選択です。Exam Experience を活用できる点も大きな違いです。</p>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <button class="notes-toggle" onclick="toggleNotes('n9')">Speaker notes <span class="notes-caret" id="c9">▼</span></button>
+      <div class="notes-content" id="n9">
+        <p>プラン選択で最もよくある質問は「Course と Standard どちらがいいですか？」です。答え方の目安：「1 つの資格だけ取る予定で、あとはその資格だけで十分という方には Course で十分です。ただし、RHCSA を取ったあとに RHCE も目指したい、OpenShift も勉強したいと少しでも思うなら、最初から Standard を選ぶ方がトータルのコストは低くなります」</p>
+        <p>試験チケット 5 回分の価値も具体的に説明できます：試験を 1 回個別に申し込むコストと比較すると、Standard プランで含まれる 5 回分のチケットだけで、サブスクリプション費用のかなりの部分を回収できる計算になります。</p>
+        <p><strong>まとめのメッセージとして：</strong>「今日学んだこと——試験体系、称号、学習パス、そして Exam Experience という練習環境——これらを使えば、Red Hat 認定は決して遠い目標ではありません。まず EX200（RHCSA）という最初の一歩を踏み出す準備を、ぜひ今日から始めてみてください。」</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function show(idx) {
+  document.querySelectorAll('.slide').forEach((s, i) => s.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+}
+function toggleNotes(id) {
+  const content = document.getElementById(id);
+  const caret = document.getElementById('c' + id.replace('n', ''));
+  content.classList.toggle('open');
+  if (caret) caret.classList.toggle('open');
+}
+</script>

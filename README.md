@@ -20,3 +20,10 @@ AI（Claude / Gemini等）から最高精度の回答を引き出すための、
 
 ---
 © 2026 Lab8010 - [MIT License](LICENSE)
+
+## 🌐 公開済みの成果物 (GitHub Pages)
+
+### Red Hat 認定資格完全ガイド 2026
+- **[最新版 (v3)](https://Lab8010.github.io/ai_prompt_sample/artifacts/redhat-certification-guide/v3/)** - コスト比較（日額単価）と10枚構成
+- **[第2版 (v2)](https://Lab8010.github.io/ai_prompt_sample/artifacts/redhat-certification-guide/v2/)** - 教育意思決定者・初学者向け
+- **[初版 (v1)](https://Lab8010.github.io/ai_prompt_sample/artifacts/redhat-certification-guide/v1/)** - ビジュアル・エモーショナル重視
