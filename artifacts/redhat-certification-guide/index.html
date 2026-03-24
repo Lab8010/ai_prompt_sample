@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: transparent;
+    font-family: 'Noto Sans JP', var(--font-sans), sans-serif;
+    color: var(--color-text-primary);
+  }
+
+  .deck {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+
+  /* ---- NAV TABS ---- */
+  .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 12px 12px 0;
+    background: #1a0000;
+    border-radius: 12px 12px 0 0;
+  }
+  .nav-tab {
+    padding: 6px 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    background: transparent;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.8); }
+  .nav-tab.active { background: #CC0000; color: #fff; }
+
+  /* ---- SLIDE PANEL ---- */
+  .slide-panel {
+    display: none;
+    flex-direction: column;
+    background: #0d0000;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    min-height: 520px;
+  }
+  .slide-panel.active { display: flex; }
+
+  /* ---- SLIDE STAGE ---- */
+  .slide-stage {
+    position: relative;
+    flex: 1;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(204,0,0,0.3);
+  }
+
+  /* Red geometric accent shapes */
+  .bg-shape {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .slide-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 40px 32px;
+    width: 100%;
+  }
+
+  .slide-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #CC0000;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  .slide-keymessage {
+    font-family: 'Bebas Neue', 'Noto Sans JP', sans-serif;
+    font-size: clamp(52px, 8vw, 88px);
+    line-height: 0.95;
+    color: #fff;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 60px rgba(204,0,0,0.4);
+    margin-bottom: 24px;
+  }
+
+  .slide-keymessage .accent {
+    color: #CC0000;
+  }
+
+  .slide-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* ---- DIAGRAM AREA ---- */
+  .diagram-area {
+    padding: 20px 24px;
+    background: #0d0000;
+  }
+  .diagram-toggle {
+    font-size: 11px;
+    color: rgba(204,0,0,0.8);
+    cursor: pointer;
+    border: 0.5px solid rgba(204,0,0,0.4);
+    background: transparent;
+    padding: 6px 16px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: block;
+    width: fit-content;
+  }
+  .diagram-toggle:hover { background: rgba(204,0,0,0.1); }
+
+  .mermaid-block {
+    display: none;
+    background: #130000;
+    border: 0.5px solid rgba(204,0,0,0.25);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    color: rgba(255,200,180,0.8);
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .mermaid-block.open { display: block; }
+
+  /* ---- SPEAKER NOTES ---- */
+  .notes-section {
+    background: #130000;
+    border-top: 1px solid rgba(204,0,0,0.15);
+  }
+  .notes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .notes-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(204,0,0,0.7);
+    font-weight: 700;
+  }
+  .notes-arrow {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    transition: transform 0.2s;
+  }
+  .notes-arrow.open { transform: rotate(180deg); }
+  .notes-body {
+    display: none;
+    padding: 0 20px 20px;
+    font-size: 13px;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.6);
+    border-top: 0.5px solid rgba(255,255,255,0.06);
+  }
+  .notes-body.open { display: block; padding-top: 16px; }
+  .notes-body p { margin-bottom: 10px; }
+  .notes-body strong { color: rgba(204,0,0,0.9); font-weight: 700; }
+
+  /* ---- VISUAL VARIANTS per slide ---- */
+
+  /* S1: Decode */
+  .s1-grid {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .prefix-badge {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .pb-rh { background: rgba(204,0,0,0.2); color: #ff6060; border: 0.5px solid rgba(204,0,0,0.4); }
+  .pb-do { background: rgba(0,80,200,0.2); color: #80b4ff; border: 0.5px solid rgba(0,80,200,0.4); }
+  .pb-au { background: rgba(200,140,0,0.2); color: #ffd080; border: 0.5px solid rgba(200,140,0,0.4); }
+  .pb-ex { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 0.5px solid rgba(255,255,255,0.2); }
+
+  /* S3: Reward tiers */
+  .tier-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 32px;
+  }
+  .tier-card {
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+    width: 150px;
+    border: 0.5px solid;
+  }
+  .tier-bronze { background: rgba(120,60,0,0.25); border-color: rgba(180,100,0,0.4); }
+  .tier-silver { background: rgba(60,100,160,0.25); border-color: rgba(80,140,220,0.4); }
+  .tier-gold   { background: rgba(180,120,0,0.25); border-color: rgba(240,180,0,0.4); }
+  .tier-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; }
+  .tier-bronze .tier-title { color: #e09040; }
+  .tier-silver .tier-title { color: #80b4ff; }
+  .tier-gold .tier-title   { color: #ffd060; }
+  .tier-exam { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 6px; }
+
+  /* S5: Tactics list */
+  .tactic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 24px;
+    text-align: left;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tactic-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(204,0,0,0.08);
+    border-left: 2px solid #CC0000;
+    border-radius: 0 4px 4px 0;
+  }
+  .tactic-num { font-size: 10px; color: #CC0000; font-weight: 900; min-width: 16px; padding-top: 2px; }
+  .tactic-text { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .tactic-text strong { color: rgba(255,255,255,0.9); }
+
+  /* S6: Checklist */
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 24px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .check-no   { background: rgba(180,0,0,0.2); color: rgba(255,140,120,0.9); border: 0.5px solid rgba(180,0,0,0.4); }
+  .check-yes  { background: rgba(0,160,80,0.15); color: rgba(100,240,140,0.9); border: 0.5px solid rgba(0,160,80,0.35); }
+  .check-icon { font-size: 13px; flex-shrink: 0; }
+
+  /* S8: Plan compare */
+  .plan-grid {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .plan-card {
+    border-radius: 8px;
+    padding: 18px 16px;
+    width: 160px;
+    border: 0.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+  }
+  .plan-card.featured {
+    border-color: #CC0000;
+    background: rgba(204,0,0,0.1);
+  }
+  .plan-name { font-size: 11px; letter-spacing: 0.12em; font-weight: 700; color: rgba(255,255,255,0.8); text-transform: uppercase; }
+  .plan-card.featured .plan-name { color: #ff8080; }
+  .plan-features { margin-top: 10px; }
+  .plan-feat { font-size: 10px; color: rgba(255,255,255,0.5); line-height: 1.8; }
+  .plan-feat.on { color: rgba(100,240,140,0.8); }
+
+  /* Red line separator */
+  .red-line {
+    width: 40px;
+    height: 2px;
+    background: #CC0000;
+    margin: 16px auto;
+  }
+
+  /* Slide number */
+  .slide-num {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.15);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    z-index: 3;
+  }
+
+  /* BG decorations */
+  .bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .bg-line {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.07;
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- NAV -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSlide(0)">S1 解読</button>
+    <button class="nav-tab" onclick="showSlide(1)">S2 ロードマップ</button>
+    <button class="nav-tab" onclick="showSlide(2)">S3 基礎</button>
+    <button class="nav-tab" onclick="showSlide(3)">S4 最先端</button>
+    <button class="nav-tab" onclick="showSlide(4)">S5 鉄則</button>
+    <button class="nav-tab" onclick="showSlide(5)">S6 環境</button>
+    <button class="nav-tab" onclick="showSlide(6)">S7 秘密兵器</button>
+    <button class="nav-tab" onclick="showSlide(7)">S8 まとめ</button>
+  </div>
+
+  <!-- ========== SLIDE 1 ========== -->
+  <div class="slide-panel active" id="slide-0">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:500px;height:500px;background:radial-gradient(circle,rgba(204,0,0,0.12) 0%,transparent 70%);top:-100px;left:-100px;"></div>
+      <svg class="bg-shape" style="position:absolute;top:0;right:0;width:200px;height:200px;opacity:0.06" viewBox="0 0 200 200"><polygon points="200,0 200,200 0,200" fill="#CC0000"/></svg>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 01 — コードを読み解け</div>
+        <div class="slide-keymessage">暗号が<br><span class="accent">解けた瞬間</span><br>すべてが見える</div>
+        <div class="red-line"></div>
+        <div class="slide-sub">Prefix · Level · Path</div>
+        <div class="s1-grid">
+          <span class="prefix-badge pb-rh">RH = RHEL系</span>
+          <span class="prefix-badge pb-do">DO = OpenShift系</span>
+          <span class="prefix-badge pb-au">AU = Ansible系</span>
+          <span class="prefix-badge pb-ex">EX = 試験 (Exam)</span>
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;">百の位 = 難易度レベル</div>
+      </div>
+      <div class="slide-num">01 / 08</div>
+    </div>
+    <div class="diagram-area">
+      <button class="diagram-toggle" onclick="toggleDiagram('d1')">[ DIAGRAM ] コード体系 Mermaid</button>
+      <div class="mermaid-block" id="d1">flowchart LR
+  A([コード番号]) --> B{接頭辞}
+  B -->|RH| C[RHEL系\n基盤Linux]
+  B -->|DO| D[OpenShift系\nコンテナ]
+  B -->|AU| E[Ansible系\n自動化]
+  B -->|EX| F[試験\nExam]
+  A --> G{百の位}
+  G -->|1xx| H[入門・基礎]
+  G -->|2xx| I[中級]
+  G -->|4xx| J[上級・専門]
+  style F fill:#3d0000,stroke:#CC0000,color:#ff9090
+  style H fill:#1a1a00,stroke:#666600,color:#cccc60
+  style I fill:#001a2a,stroke:#005580,color:#60b0ff
+  style J fill:#2a0020,stroke:#880060,color:#ff80cc</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n1')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n1">▼</span>
+      </div>
+      <div class="notes-body" id="n1">
+        <p><strong>「この体系を理解した瞬間、迷子にならなくなります。」</strong></p>
+        <p>Red Hatの試験コードは、一見ランダムな番号に見えますが、実は精密な設計がされています。接頭辞の2文字がドメインを示し、百の位の数字が難易度を示す。例えばRH124なら「RHEL系の入門レベル」とわかります。</p>
+        <p>そして最も重要なルール：<strong>「トレーニングと試験は同じ番号で対応する」</strong>。DO156でトレーニングを受けたら、EX156を受験する。シンプルで強力なロジックです。</p>
+        <p>この暗号を解読できたエンジニアだけが、最短ルートを歩めます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 2 ========== -->
+  <div class="slide-panel" id="slide-1">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:600px;height:600px;background:radial-gradient(circle,rgba(204,0,0,0.08) 0%,transparent 65%);top:-150px;right:-150px;"></div>
+      <svg class="bg-shape" style="position:absolute;bottom:0;left:0;width:180px;height:180px;opacity:0.06" viewBox="0 0 180 180"><polygon points="0,0 180,0 0,180" fill="#CC0000"/></svg>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 02 — 称号への道</div>
+        <div class="slide-keymessage">三つの<span class="accent">称号</span>が<br>キャリアを<br>定義する</div>
+        <div class="red-line"></div>
+        <div class="tier-row">
+          <div class="tier-card tier-bronze">
+            <div class="tier-title">RHCSA</div>
+            <div class="tier-exam">EX200合格</div>
+          </div>
+          <div style="display:flex;align-items:center;color:rgba(255,255,255,0.2);font-size:18px;">→</div>
+          <div class="tier-card tier-silver">
+            <div class="tier-title">RHCE</div>
+            <div class="tier-exam">RHCSA保有<br>+ EX294合格</div>
+          </div>
+          <div style="display:flex;align-items:center;color:rgba(255,255,255,0.2);font-size:18px;">→</div>
+          <div class="tier-card tier-gold">
+            <div class="tier-title">RHCA</div>
+            <div class="tier-exam">RHCE保有<br>+ 任意5認定</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-num">02 / 08</div>
+    </div>
+    <div class="diagram-area">
+      <button class="diagram-toggle" onclick="toggleDiagram('d2')">[ DIAGRAM ] 称号ロードマップ Mermaid</button>
+      <div class="mermaid-block" id="d2">flowchart TD
+  A([エンジニア]) --> B[EX200を受験]
+  B -->|合格| C{{"🏅 RHCSA 取得"}}
+  C --> D[EX294を受験]
+  D -->|合格| E{{"🥈 RHCE 取得"}}
+  E --> F[任意の試験を5つ受験]
+  F -->|5認定達成| G{{"👑 RHCA 最高位"}}
+  style C fill:#3d1500,stroke:#CC6600,color:#ffaa60
+  style E fill:#001a3d,stroke:#0055CC,color:#60aaff
+  style G fill:#2a1a00,stroke:#998800,color:#ffdd40</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n2')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n2">▼</span>
+      </div>
+      <div class="notes-body" id="n2">
+        <p><strong>「この三段階の構造こそが、Red Hat認定の美しさです。」</strong></p>
+        <p>RHCSA（Red Hat Certified System Administrator）は入口です。EX200という一つの試験を突破するだけで、正式にRed Hat認定エンジニアの仲間入りができます。</p>
+        <p>RHCEはその上位。有効なRHCSAを保有した状態でEX294（Ansible自動化）に合格することで取得できます。<strong>「有効な」という言葉に注目してください</strong>——認定には有効期限があり、更新が必要です。</p>
+        <p>そして頂点のRHCA（Red Hat Certified Architect）。RHCEを持ちながら、さらに任意の5認定を積み上げる。これは単なる試験合格ではなく、複数ドメインへの深い専門性の証明です。</p>
+        <p><strong>最初の一歩はEX200。今日、その決断をするかどうかです。</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 3 ========== -->
+  <div class="slide-panel" id="slide-2">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:400px;height:400px;background:radial-gradient(circle,rgba(180,60,0,0.1) 0%,transparent 70%);bottom:-100px;right:-50px;"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 03 — 基礎から積み上げろ</div>
+        <div class="slide-keymessage">土台なき<br><span class="accent">頂</span>はない</div>
+        <div class="red-line"></div>
+        <div class="slide-sub">RHEL · Ansible — 自動化への第一歩</div>
+        <div style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <div style="padding:10px 16px;background:rgba(204,0,0,0.1);border:0.5px solid rgba(204,0,0,0.3);border-radius:6px;font-size:11px;color:rgba(255,180,160,0.9);text-align:center;">
+            <div style="font-weight:700;letter-spacing:0.1em;">RH124 / 134</div>
+            <div style="color:rgba(255,255,255,0.35);margin-top:4px;">RHEL基礎</div>
+          </div>
+          <div style="padding:10px 16px;background:rgba(204,0,0,0.1);border:0.5px solid rgba(204,0,0,0.3);border-radius:6px;font-size:11px;color:rgba(255,180,160,0.9);text-align:center;">
+            <div style="font-weight:700;letter-spacing:0.1em;">RH199</div>
+            <div style="color:rgba(255,255,255,0.35);margin-top:4px;">RHCSA速習</div>
+          </div>
+          <div style="padding:10px 16px;background:rgba(200,100,0,0.1);border:0.5px solid rgba(200,100,0,0.3);border-radius:6px;font-size:11px;color:rgba(255,200,120,0.9);text-align:center;">
+            <div style="font-weight:700;letter-spacing:0.1em;">AU294</div>
+            <div style="color:rgba(255,255,255,0.35);margin-top:4px;">Ansible自動化</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-num">03 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n3')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n3">▼</span>
+      </div>
+      <div class="notes-body" id="n3">
+        <p><strong>「すべての偉大な自動化は、コマンド一行から始まります。」</strong></p>
+        <p>RH124とRH134はRHELの基礎と中級です。コマンドライン操作、ファイル管理、ユーザー管理、ネットワーク設定。これらをパズルのように実機で操作する中で、Linuxの本質が体に染み込んでいきます。</p>
+        <p>時間が限られているなら、RH199（RHCSA Rapid Track）という選択肢があります。RH124とRH134を圧縮した濃密な短期集中コースです。</p>
+        <p>RHCEを目指すなら、次はAU294。AnsibleによるLinux管理の自動化を学びます。繰り返し作業をコードに変える感覚は、<strong>一度覚えたら戻れない快感</strong>です。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 4 ========== -->
+  <div class="slide-panel" id="slide-3">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:500px;height:500px;background:radial-gradient(circle,rgba(0,60,200,0.1) 0%,transparent 65%);top:-100px;right:-100px;"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 04 — 最先端へ</div>
+        <div class="slide-keymessage"><span class="accent">コンテナ</span>が<br>世界を<br>動かす</div>
+        <div class="red-line"></div>
+        <div class="slide-sub">OpenShift · Virtualization</div>
+        <div style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <div style="padding:10px 16px;background:rgba(0,60,200,0.1);border:0.5px solid rgba(0,80,220,0.3);border-radius:6px;font-size:11px;color:rgba(120,180,255,0.9);text-align:center;">
+            <div style="font-weight:700;">DO180</div><div style="color:rgba(255,255,255,0.35);margin-top:4px;">OpenShift入門</div>
+          </div>
+          <div style="padding:10px 16px;background:rgba(0,60,200,0.1);border:0.5px solid rgba(0,80,220,0.3);border-radius:6px;font-size:11px;color:rgba(120,180,255,0.9);text-align:center;">
+            <div style="font-weight:700;">DO280</div><div style="color:rgba(255,255,255,0.35);margin-top:4px;">OCP管理</div>
+          </div>
+          <div style="padding:10px 16px;background:rgba(0,100,160,0.1);border:0.5px solid rgba(0,120,180,0.3);border-radius:6px;font-size:11px;color:rgba(100,200,255,0.9);text-align:center;">
+            <div style="font-weight:700;">DO156</div><div style="color:rgba(255,255,255,0.35);margin-top:4px;">Virtualization</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-num">04 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n4')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n4">▼</span>
+      </div>
+      <div class="notes-body" id="n4">
+        <p><strong>「クラウドネイティブ時代のエンジニアに求められるスキルセットの核心がここにあります。」</strong></p>
+        <p>DO180はOpenShift（エンタープライズKubernetes）の入口です。コンテナとは何か、Podとは何か。手を動かしながら体得します。DO280ではOpenShiftクラスターそのものを管理する立場になります。</p>
+        <p>DO156は仮想化技術のトラック。OpenShift Virtualizationを使い、VMとコンテナを同一プラットフォームで扱う現代のハイブリッドインフラを学びます。</p>
+        <p><strong>「コンテナを知らないインフラエンジニア」は、もはや市場で戦えません。</strong>これらの認定は、その差を埋める最速のルートです。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 5 ========== -->
+  <div class="slide-panel" id="slide-4">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:450px;height:450px;background:radial-gradient(circle,rgba(204,0,0,0.15) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 05 — 実機試験の聖域</div>
+        <div class="slide-keymessage">知識より<br><span class="accent">実力</span><br>それが試される</div>
+        <div class="tactic-list">
+          <div class="tactic-item"><span class="tactic-num">01</span><span class="tactic-text"><strong>Copy & Paste</strong>：問題文から直接コピー。スペルミスは命取り</span></div>
+          <div class="tactic-item"><span class="tactic-num">02</span><span class="tactic-text"><strong>man / help</strong>：試験環境内のドキュメントを使い倒す</span></div>
+          <div class="tactic-item"><span class="tactic-num">03</span><span class="tactic-text"><strong>確実な問題から</strong>：スコアを積み上げ、心理的余裕を作る</span></div>
+        </div>
+      </div>
+      <div class="slide-num">05 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n5')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n5">▼</span>
+      </div>
+      <div class="notes-body" id="n5">
+        <p><strong>「Red Hatの試験に選択式問題はありません。あるのは、動く実機だけです。」</strong></p>
+        <p>これがRed Hat認定の本質的な差別化です。4択を当てるのではなく、実際にコマンドを打ち、設定ファイルを編集し、サービスを動作させる。採点は自動スクリプトが行います。設定が正しければ合格、間違っていれば不合格。誤魔化しは一切効きません。</p>
+        <p><strong>Copy & Pasteは反則ではなく、現場の鉄則です。</strong>実務でも正確なコマンドをミスなく実行することが求められます。試験はその習慣を身につける場でもあります。</p>
+        <p>試験環境内ではman（マニュアル）コマンドが使えます。これは「カンニング」ではなく、「現場で許されているリソースの活用」です。実務でも同じです。</p>
+        <p><strong>「本物の実力だけが通用する聖域。だからこそRHCSAの価値は揺るぎない。」</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 6 ========== -->
+  <div class="slide-panel" id="slide-5">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:400px;height:400px;background:radial-gradient(circle,rgba(100,0,0,0.12) 0%,transparent 70%);bottom:-50px;left:-50px;"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 06 — 自宅受験の掟</div>
+        <div class="slide-keymessage">環境も<br><span class="accent">実力</span>の<br>一部だ</div>
+        <div class="red-line"></div>
+        <div class="check-grid">
+          <div class="check-item check-no"><span class="check-icon">✗</span><span>外部モニター禁止</span></div>
+          <div class="check-item check-no"><span class="check-icon">✗</span><span>スマホ・時計禁止</span></div>
+          <div class="check-item check-no"><span class="check-icon">✗</span><span>メモ・ペン禁止</span></div>
+          <div class="check-item check-yes"><span class="check-icon">✓</span><span>飲み物はOK</span></div>
+          <div class="check-item check-yes"><span class="check-icon">✓</span><span>部屋全体カメラ確認</span></div>
+          <div class="check-item check-yes"><span class="check-icon">✓</span><span>USB起動メモリ準備</span></div>
+        </div>
+      </div>
+      <div class="slide-num">06 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n6')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n6">▼</span>
+      </div>
+      <div class="notes-body" id="n6">
+        <p><strong>「試験当日のパニックは、知識の欠如ではなく環境の準備不足から来ることが多い。」</strong></p>
+        <p>Remote Exam（自宅受験）では、試験監督官がカメラ越しにデスク全体を確認します。外部モニターは接続禁止（取り外しかカバー）。デスク上にはスマートフォン、腕時計、メモ帳、ペンは一切置けません。</p>
+        <p><strong>ただし、飲み物は置いてOKです。</strong>長丁場の試験、適度な水分補給は集中力維持に重要。これは覚えておいてください。</p>
+        <p>技術面では、Red Hat提供の専用USB起動メモリを事前に作成しておくことが必須です。OS起動に失敗した場合のFAQも事前に確認しておく。当日のトラブルで焦らないための、これが備えです。</p>
+        <p><strong>「準備した者だけが、試験に集中できる。」</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 7 ========== -->
+  <div class="slide-panel" id="slide-6">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:600px;height:600px;background:radial-gradient(circle,rgba(204,0,0,0.18) 0%,transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+      <svg class="bg-shape" style="position:absolute;top:20px;right:20px;width:100px;height:100px;opacity:0.1" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#CC0000" stroke-width="2"/>
+        <circle cx="50" cy="50" r="30" fill="none" stroke="#CC0000" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="15" fill="#CC0000"/>
+      </svg>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 07 — RHLS特権</div>
+        <div class="slide-keymessage">暗闇を照らす<br><span class="accent">唯一の</span><br>明かり</div>
+        <div class="red-line"></div>
+        <div style="margin-top:20px;padding:20px 24px;background:rgba(204,0,0,0.08);border:0.5px solid rgba(204,0,0,0.4);border-radius:8px;max-width:400px;margin-left:auto;margin-right:auto;">
+          <div style="font-size:13px;font-weight:700;color:#ff8080;letter-spacing:0.1em;margin-bottom:8px;">Exam Experience</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.8;">
+            本番と同一プロセス<br>
+            難易度・雰囲気を完全再現<br>
+            <span style="color:rgba(100,240,140,0.8);">RHLS Standard / Premium 限定</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-num">07 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n7')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n7">▼</span>
+      </div>
+      <div class="notes-body" id="n7">
+        <p><strong>「これを知っているかどうかで、当日の心拍数が全く変わります。」</strong></p>
+        <p>Exam Experience（試験体験）は、RHLS（Red Hat Learning Subscription）のStandardまたはPremiumプランに加入しているユーザーだけが使える、完全な模擬試験環境です。</p>
+        <p>「模擬」といっても、本番と全く同じプロセスで受験できます。試験監督官チェック、試験インターフェース、制限時間、問題の難易度レベルまで忠実に再現。<strong>初めて本番に臨む緊張感と不安を、事前に経験して消化できます。</strong></p>
+        <p>多くの受験者が「当日の一番の敵は焦りだった」と語ります。Exam Experienceを一度体験した人は、当日「ああ、これ知ってる。いつも通りやればいい」という感覚で試験に臨めます。</p>
+        <p><strong>「これこそがRHLSに投資する、最も具体的な理由の一つです。」</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 8 ========== -->
+  <div class="slide-panel" id="slide-7">
+    <div class="slide-stage">
+      <div class="bg-circle" style="width:500px;height:500px;background:radial-gradient(circle,rgba(204,0,0,0.12) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow">Slide 08 — 万全の準備</div>
+        <div class="slide-keymessage">準備した者が<br><span class="accent">認定</span>を<br>掴む</div>
+        <div class="red-line"></div>
+        <div class="plan-grid">
+          <div class="plan-card">
+            <div class="plan-name">Course</div>
+            <div class="plan-features">
+              <div class="plan-feat on">1資格集中</div>
+              <div class="plan-feat">全カタログ ✗</div>
+              <div class="plan-feat">Exam Experience ✗</div>
+            </div>
+          </div>
+          <div class="plan-card featured">
+            <div class="plan-name">Standard</div>
+            <div class="plan-features">
+              <div class="plan-feat on">全カタログ ✓</div>
+              <div class="plan-feat on">試験5回 ✓</div>
+              <div class="plan-feat on">Exam Experience ✓</div>
+            </div>
+          </div>
+          <div class="plan-card featured">
+            <div class="plan-name">Premium</div>
+            <div class="plan-features">
+              <div class="plan-feat on">全カタログ ✓</div>
+              <div class="plan-feat on">試験5回 ✓</div>
+              <div class="plan-feat on">Exam Experience ✓</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:24px;font-size:11px;color:rgba(204,0,0,0.7);letter-spacing:0.1em;">YOUR JOURNEY STARTS NOW</div>
+      </div>
+      <div class="slide-num">08 / 08</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header" onclick="toggleNotes('n8')">
+        <span class="notes-label">Speaker Notes</span>
+        <span class="notes-arrow" id="arr-n8">▼</span>
+      </div>
+      <div class="notes-body" id="n8">
+        <p><strong>「ここまで話してきた全てを、最大限に活かせるのがRHLSです。」</strong></p>
+        <p>Courseプランは1つの資格に集中したい場合の選択肢。コストを抑えて特定の試験対策に集中できます。</p>
+        <p>Standard・Premiumプランは本気でキャリアを変えたい人向けです。Red Hatが提供する全トレーニングカタログへのアクセス、試験チケット5回分、そして先ほど紹介した<strong>Exam Experienceが使えます</strong>。</p>
+        <p>1つの認定だけでなく、RHCSA→RHCE→RHCAへの道を一つのサブスクリプションで歩み続けられます。</p>
+        <p><strong>「認定は持っている人と持っていない人に世界を二分する。今日この場で、どちらの側に立つかを決めてください。」</strong></p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<script>
+function showSlide(idx) {
+  document.querySelectorAll('.slide-panel').forEach((p,i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    t.classList.toggle('active', i === idx);
+  });
+}
+function toggleDiagram(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+function toggleNotes(id) {
+  const body = document.getElementById(id);
+  const arrId = 'arr-' + id;
+  const arr = document.getElementById(arrId);
+  if (body) body.classList.toggle('open');
+  if (arr) arr.classList.toggle('open');
+}
+</script>
+</body>
+</html>
